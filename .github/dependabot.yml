@@ -12,6 +12,10 @@ updates:
       - dependency-name: "Umbraco.*"
       - dependency-name: "uSync*"
       - dependency-name: "Cultiv.Hangfire"
+      # Clean (test site starter kit) majors track Umbraco majors: Clean 8 needs
+      # Umbraco.Cms.Web.Website 18.3.1+, so it would drag Umbraco 18 into the v17 site.
+      - dependency-name: "Clean"
+        update-types: ["version-update:semver-major"]
     # majors are deliberately left out of the group so they arrive as one PR each.
     groups:
       nuget-dependencies:
