@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "nuget"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     # Umbraco, uSync and Cultiv.Hangfire are pinned deliberately. The versions referenced
     # here set the minimum for anyone installing these packages, so they move when we
     # choose to move them - not on a weekly schedule. Note this also opts them out of
@@ -28,7 +28,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     # gittools/actions v4 requires GitVersion >= 6.2, which needs GitVersion.yml migrating
     # to the v6 schema. Dependabot can't see that the action version and the versionSpec
     # input are coupled, so bumping it alone broke the package-build workflow. Unpin this

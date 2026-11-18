@@ -15,6 +15,10 @@ on:
   push:
     tags:
       - "v*"
+  # Rehearsal: /release runs this on the branch before tagging. It builds and packs
+  # exactly as a release does, but every step that checks the tag or publishes needs
+  # `github.event_name == 'push'`, so a rehearsal can never ship anything.
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -51,6 +55,12 @@ jobs:
         id: version
         shell: bash
         run: |
+          if [ "$GITHUB_EVENT_NAME" != "push" ]; then
+            version="0.0.0-rehearsal.$GITHUB_RUN_NUMBER"
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+            echo "Rehearsal on $GITHUB_REF_NAME, packing as $version"
+            exit 0
+          fi
           version="${GITHUB_REF_NAME#v}"
           if ! printf '%s' "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
             echo "::error::Tag '$GITHUB_REF_NAME' is not v{major}.{minor}.{patch}[-suffix]"
@@ -60,6 +70,7 @@ jobs:
           echo "Releasing $version"
 
       - name: check the tag is on a release branch
+        if: ${{ github.event_name == 'push' }}
         shell: bash
         run: |
           git fetch origin '+refs/heads/*:refs/remotes/origin/*' --quiet
@@ -110,6 +121,7 @@ jobs:
       # works if a matching policy exists on nuget.org for this repo + workflow, and
       # "user" must be the nuget.org account that owns that policy.
       - name: nuget login
+        if: ${{ github.event_name == 'push' }}
         id: nuget_login
         uses: NuGet/login@v1
         with:
@@ -125,6 +137,7 @@ jobs:
       #   doesn't treat it as a wildcard on Windows and fails with "File does not
       #   exist", despite the same pattern working fine with no subdirectory at all.
       - name: push to nuget
+        if: ${{ github.event_name == 'push' }}
         env:
           NUGET_API_KEY: ${{ steps.nuget_login.outputs.NUGET_API_KEY }}
         run: >
